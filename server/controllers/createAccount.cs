@@ -13,9 +13,9 @@ public class CreateAccountController : ControllerBase
         var service = new PassowrdHasher();
         string hashedPassword = service.HashPassword(user.password != null ? user.password : "");
         Guid id = Guid.NewGuid();
-        var newUser = new User{id=id, username=user.username, email=user.email, password=hashedPassword};
-        var token = Generator.GenerateRefreshToken();
-        var refresh_token = new  RefreshToken { token = token, userid = id, created_at = DateTime.UtcNow, expires_at = DateTime.UtcNow.AddHours(3) };
+        var newUser = new User(id, user.username, hashedPassword, user.email);
+        var token = RefreshToken.GenerateRefreshToken();
+        var refresh_token = new RefreshToken(null, token, DateTime.UtcNow, DateTime.UtcNow.AddHours(3), id);
         try
         {
             _context.users.Add(newUser);
@@ -23,17 +23,35 @@ public class CreateAccountController : ControllerBase
 
             _context.refresh_tokens.Add(refresh_token);
             await _context.SaveChangesAsync();
+
+            Response.Cookies.Append("refreshtoken", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+            var accessToken = AccessToken.GenerateAccessToken(id, "QmCFv5yd1tiDf14p+pEpUyhA50vBYehAWMGqrOgBrOE=");
+            Response.Cookies.Append("accesstoken", accessToken, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+            });
         }
         catch (Exception e)
         {
             Console.WriteLine(e.InnerException?.Message);
-            return StatusCode(500, new { duplicateUsername = e.InnerException?.Message.Contains("duplicate key value violates unique constraint \"users_username_key\""), duplicateEmail = e.InnerException?.Message.Contains("duplicate key value violates unique constraint \"users_email_key\"") } );
+            Console.WriteLine(e);
+            return StatusCode(500, new {error=e.Message, duplicateUsername = e.InnerException?.Message.Contains("duplicate key value violates unique constraint \"users_username_key\""), duplicateEmail = e.InnerException?.Message.Contains("duplicate key value violates unique constraint \"users_email_key\"") });
         }
         
         return CreatedAtAction(nameof(GetUsers), new { }, user);
     }
 
-        public CreateAccountController(AppDbContext context)
+    public CreateAccountController(AppDbContext context)
     {
         _context = context;
     }

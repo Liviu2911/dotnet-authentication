@@ -46,3 +46,11 @@
 /Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Microsoft.Extensions.Primitives.dll
 /Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Npgsql.dll
 /Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
+/Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Microsoft.IdentityModel.Logging.dll
+/Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.dll
+/Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
+/Users/liviu/code/auth-dotnet/server/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll
