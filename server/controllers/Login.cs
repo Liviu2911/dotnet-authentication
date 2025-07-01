@@ -24,9 +24,9 @@ public class LoginController : ControllerBase
             if (check)
             {
                 var token = RefreshToken.GenerateRefreshToken();
-                var accessToken = AccessToken.GenerateAccessToken(results[0].id, "QmCFv5yd1tiDf14p+pEpUyhA50vBYehAWMGqrOgBrOE=");
+                var accessToken = AccessToken.GenerateAccessToken(results[0].id.ToString() ?? "");
 
-                var refreshToken = new RefreshToken(null, token, DateTime.UtcNow, DateTime.UtcNow.AddHours(3), results[0].id);
+                var refreshToken = new RefreshToken { token = token, created_at = DateTime.UtcNow, expires_at = DateTime.UtcNow.AddHours(3), userid = results[0].id };
                 try
                 {
                     _context.refresh_tokens.Add(refreshToken);
@@ -47,7 +47,7 @@ public class LoginController : ControllerBase
                         Expires = DateTime.UtcNow.AddMinutes(15)
                     });
 
-                    return Ok(new { message = "User logged in"});
+                    return Ok(new { message = "User logged in" , accessToken});
                 }
                 catch (Exception e)
                 {

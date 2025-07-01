@@ -7,24 +7,23 @@ using Microsoft.IdentityModel.Tokens;
 
 public static class AccessToken
 {
-    public static string GenerateAccessToken(Guid? userid, string secretKey)
+    public static string GenerateAccessToken(string userid)
     {
-        var claims = new[]
+        var handler = new JwtSecurityTokenHandler();
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("QmCFv5yd1tiDf14p+pEpUyhA50vBYehAWMGqrOgBrOE="));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+        var desc = new SecurityTokenDescriptor
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userid.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            Subject = new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.Name, userid),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            }),
+            Expires = DateTime.UtcNow.AddMinutes(15),
+        SigningCredentials = creds
         };
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: "dotnet-app",
-            audience: "me",
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(15),
-            signingCredentials: creds
-        );
+        var token = handler.CreateToken(desc);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

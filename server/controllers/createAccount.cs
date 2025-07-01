@@ -13,9 +13,9 @@ public class CreateAccountController : ControllerBase
         var service = new PassowrdHasher();
         string hashedPassword = service.HashPassword(user.password != null ? user.password : "");
         Guid id = Guid.NewGuid();
-        var newUser = new User(id, user.username, hashedPassword, user.email);
+        var newUser = new User { id=id, username=user.username, password=hashedPassword, email=user.email };
         var token = RefreshToken.GenerateRefreshToken();
-        var refresh_token = new RefreshToken(null, token, DateTime.UtcNow, DateTime.UtcNow.AddHours(3), id);
+        var refresh_token = new RefreshToken { token = token, created_at = DateTime.UtcNow, expires_at=DateTime.UtcNow.AddHours(3), userid=id };
         try
         {
             _context.users.Add(newUser);
@@ -32,8 +32,8 @@ public class CreateAccountController : ControllerBase
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 
-            var accessToken = AccessToken.GenerateAccessToken(id, "QmCFv5yd1tiDf14p+pEpUyhA50vBYehAWMGqrOgBrOE=");
-            Response.Cookies.Append("accesstoken", accessToken, new CookieOptions
+            var accessToken = AccessToken.GenerateAccessToken(id.ToString() ?? "");
+            Response.Cookies.Append("accesstoken", accessToken.ToString(), new CookieOptions
             {
                 HttpOnly = false,
                 Secure = true,
@@ -45,7 +45,7 @@ public class CreateAccountController : ControllerBase
         {
             Console.WriteLine(e.InnerException?.Message);
             Console.WriteLine(e);
-            return StatusCode(500, new {error=e.Message, duplicateUsername = e.InnerException?.Message.Contains("duplicate key value violates unique constraint \"users_username_key\""), duplicateEmail = e.InnerException?.Message.Contains("duplicate key value violates unique constraint \"users_email_key\"") });
+            return StatusCode(500, new {error=e.Message, duplicateUsername = e.InnerException?.Message.Contains("users_username_key"), duplicateEmail = e.InnerException?.Message.Contains("users_email_key") });
         }
         
         return CreatedAtAction(nameof(GetUsers), new { }, user);
